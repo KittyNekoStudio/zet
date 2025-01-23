@@ -23,7 +23,7 @@ fn get_string(mut file: File, target: &str) -> Result<String, ()> {
 }
 
 // TODO! refactor this to take any arbitrary string
-fn remove_whitespace_after_euqal(string: &str) -> String {
+fn remove_until_after_equal(string: &str) -> String {
     let whitespace_end = string.char_indices().find_map(|(idx, c)| 
         if c != '=' {None} else {Some(idx + 1)})
         .unwrap_or_else(|| string.len());
@@ -46,9 +46,9 @@ mod tests {
     #[test]
     fn test_remove_whitespace_from_beginning() {
         let string = "Hello = World!".to_string();
-        assert_eq!(" World!", remove_whitespace_after_euqal(&string));
+        assert_eq!(" World!", remove_until_after_equal(&string));
 
         let string = "path = /hi/there".to_string();
-        assert_eq!(" /hi/there", remove_whitespace_after_euqal(&string));
+        assert_eq!(" /hi/there", remove_until_after_equal(&string));
     }
 }
