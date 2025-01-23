@@ -1,0 +1,15 @@
+[package]
+name = "zet"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "zetlib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "zetbin"
+path = "src/main.rs"
+
+[dependencies]
+chrono = "0.4.39"
