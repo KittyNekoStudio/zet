@@ -22,14 +22,17 @@ fn get_string(mut file: File, target: &str) -> Result<String, ()> {
     Err(())
 }
 
-// TODO! refactor this to take any arbitrary string
-fn remove_until_after_equal(string: &str) -> String {
-    let whitespace_end = string.char_indices().find_map(|(idx, c)| 
-        if c != '=' {None} else {Some(idx + 1)})
-        .unwrap_or_else(|| string.len());
+fn remove_inclusive(string: &str, target: char) -> Result<String, String> {
+    let char_end = string.char_indices().find_map(|(idx, c)| 
+        if c != target {None} else {Some(idx + 1)});
 
-    string[whitespace_end..].to_string()
+    if char_end.is_some() {
+        return Ok(string[char_end.unwrap()..].to_string());
+    } else {
+        return Err(string.to_string());
+    }
 }
+
 
 #[cfg(test)]
 mod tests {
@@ -44,11 +47,16 @@ mod tests {
         assert_eq!(string, Ok("Hello, World! Testing.".to_string()));
     }
     #[test]
-    fn test_remove_whitespace_from_beginning() {
-        let string = "Hello = World!".to_string();
-        assert_eq!(" World!", remove_until_after_equal(&string));
+    fn remove_arbitrary_char_from_string_ok() {
+        let string = "Hello = World!";
+        assert_eq!(" World!", remove_inclusive(string, '=').unwrap());
 
-        let string = "path = /hi/there".to_string();
-        assert_eq!(" /hi/there", remove_until_after_equal(&string));
+        let string = " World!";
+        assert_eq!("World!", remove_inclusive(string, ' ').unwrap());
+     }
+    #[test]
+    fn remove_arbitrary_char_from_string_err() {
+        let string = "Hello = World!";
+        assert_eq!(true, remove_inclusive(string, '-').is_err());
     }
 }
