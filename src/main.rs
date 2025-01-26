@@ -5,7 +5,7 @@ use std::env;
 use std::path::PathBuf;
 
 fn main() -> std::io::Result<()> {
-    let format = Local::now().format("%Y%m%d%H%M").to_string();
+/*  let format = Local::now().format("%Y%m%d%H%M").to_string();
     let args: Vec<String> = env::args().collect();
     let mut filename = format.clone();
     if args.len() > 1 {
@@ -33,8 +33,9 @@ fn main() -> std::io::Result<()> {
         .spawn()
         .expect("Error: Failed to run editor")
         .wait()
-        .expect("Error: Editor returned a non-zero status");
+        .expect("Error: Editor returned a non-zero status");*/
 
+    println!("Hello, World!");
 
     Ok(())
 }
