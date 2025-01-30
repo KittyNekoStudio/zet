@@ -19,13 +19,13 @@ fn get_string(mut file: File, target: &str) -> Result<String, ()> {
     // TODO! cannot read file from new_zettel_note()
     file.read_to_string(&mut buffer).unwrap();
 
+    println!("{:?}", buffer);
     let target = buffer.lines().find_map(|s| if s.contains(target) {Some(s)} else {None});
 
     if target.is_some() {
         return Ok(target.unwrap().to_string());
     }
 
-    //println!("{:?}", buffer);
     Err(())
 }
 
@@ -84,6 +84,8 @@ fn create_zettel_note() -> Result<File, std::io::Error> {
 
     file.write_all(filename.as_bytes())?;
 
+    let file = File::open(&filepath)?;
+
     Ok(file)
 }
 
@@ -122,10 +124,6 @@ mod tests {
     fn test_create_zettel_note() {
         let file = create_zettel_note();
         assert_eq!(true, file.is_ok());
-
-        dbg!(&file);
-        let string = get_string(file.unwrap(), "0").unwrap();
-        //assert_eq!("format = %Y%m%d%H%M", &string);
     }
     /*#[test]
     fn test_write_to_file() {
