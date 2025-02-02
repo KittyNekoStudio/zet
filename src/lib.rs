@@ -16,10 +16,8 @@ fn open_config(filename: String) -> std::io::Result<File> {
 
 fn get_string(mut file: File, target: &str) -> Result<String, ()> {
     let mut buffer = String::new();
-    // TODO! cannot read file from new_zettel_note()
     file.read_to_string(&mut buffer).unwrap();
 
-    println!("{:?}", buffer);
     let target = buffer.lines().find_map(|s| if s.contains(target) {Some(s)} else {None});
 
     if target.is_some() {
@@ -40,10 +38,18 @@ fn remove_inclusive(string: &str, target: char) -> Result<String, String> {
     }
 }
 
-fn open_file() -> Result<File, ()> {
-    let file_name: Vec<String> = env::args().collect();
-    println!("{:?}", env::args());
-    let file = File::open(&file_name[1]);
+pub fn open_file(filename_index: usize) -> Result<File, ()> {
+    let filename: Vec<String> = env::args().collect();
+
+    if filename.len() < 3 {
+        return Err(())
+    }
+
+    let file = File::options()
+        .read(true)
+        .append(true)
+        .open(filename[filename_index].clone());
+
     if file.is_ok() {
         return Ok(file.unwrap());
     } else {
@@ -53,7 +59,25 @@ fn open_file() -> Result<File, ()> {
 }
 
 // TODO! create custom error
-fn create_zettel_note() -> Result<File, std::io::Error> {
+pub fn write_to_file(mut template: &File, mut zettel: &File) -> Result<(), ()> {
+    let mut template_contents = String::new();
+    let _ = template.read_to_string(&mut template_contents);
+
+    let write_1 = zettel.write(b"\n");
+    if write_1.is_err() {
+        return Err(())
+    }
+
+    let write_2 = zettel.write(template_contents.as_bytes());
+    if write_2.is_err() {
+        return Err(())
+    }
+
+    Ok(())
+}
+
+// TODO! create custom error
+pub fn create_zettel_note() -> Result<File, std::io::Error> {
     let config = open_config("foo.conf".to_string());
     let filename_format = get_string(config.unwrap(), "format").unwrap();
 
@@ -86,6 +110,13 @@ fn create_zettel_note() -> Result<File, std::io::Error> {
 
     let file = File::open(&filepath)?;
 
+    std::process::Command::new("vim")
+        .arg(&filepath.into_os_string().into_string().unwrap())
+        .spawn()
+        .expect("Error: Failed to run editor")
+        .wait()
+        .expect("Error: Editor returned a non-zero status");
+ 
     Ok(file)
 }
 
@@ -114,25 +145,27 @@ mod tests {
         let string = "Hello = World!";
         assert_eq!(true, remove_inclusive(string, '-').is_err());
     }
-    #[test]
+    /*#[test]
     fn test_open_file() {
         let file = open_file();
 
         assert_eq!(true, file.is_ok());
-    }
+    }*/
     #[test]
     fn test_create_zettel_note() {
         let file = create_zettel_note();
         assert_eq!(true, file.is_ok());
     }
-    /*#[test]
+    #[test]
     fn test_write_to_file() {
-        let file = open_file();
-        let file = write_to_file(file);
+        let template = open_file(1).expect("Failed at test_write_to_file template");
+        let zettel = open_file(2).expect("Failed at test_write_to_file zettel");
+        let write = write_to_file(&template, &zettel);
 
-        assert_eq!(true, file.is_ok());
+        assert_eq!(true, write.is_ok());
 
-        let string = get_string(file.unwrap(), "testing");
-        assert_eq!(string, Ok("I am testing".to_string());
-    }*/
+        let zettel = open_file(2).expect("Failed at test_write_to_file zettel");
+        let string = get_string(zettel, "testing");
+        assert_eq!(string, Ok("I am testing".to_string()));
+    }
 }
