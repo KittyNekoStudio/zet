@@ -4,6 +4,7 @@ use std::env;
 use chrono::Local;
 use std::path::PathBuf;
 
+// TODO! file name cannot contain qoutes
 
 // TODO! add custom error to return
 fn open_config(filename: String) -> std::io::Result<File> {
@@ -110,7 +111,7 @@ pub fn create_zettel_note() -> Result<File, std::io::Error> {
 
     let file = File::open(&filepath)?;
 
-    std::process::Command::new("vim")
+    std::process::Command::new("nvim")
         .arg(&filepath.into_os_string().into_string().unwrap())
         .spawn()
         .expect("Error: Failed to run editor")
